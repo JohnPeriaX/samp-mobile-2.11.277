@@ -1,0 +1,58 @@
+//
+// Created by x1y2z on 20.04.2023.
+//
+
+#include "gta-reversed/game_sa/RenderWare/RenderWare.h"
+
+RwObject* GetFirstObjectCallback(RwObject* object, void* data) {
+    *(RwObject**)(data) = object;
+    return nullptr;
+}
+
+RwObject* GetFirstObject(RwFrame* frame) {
+    RwObject* obj{};
+    RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
+    return obj;
+}
+
+RpAtomic* GetFirstAtomic(RpClump* clump) {
+    RpAtomic* atomic{};
+    RpClumpForAllAtomics(clump, GetFirstAtomicCallback, &atomic);
+    return atomic;
+}
+
+RpAtomic* GetFirstAtomicCallback(RpAtomic* atomic, void* data) {
+    *(RpAtomic**)(data) = atomic;
+    return nullptr;
+}
+
+RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump) {
+    if(clump) {
+        RpHAnimHierarchy *anim{};
+        RpClumpForAllAtomics(clump, SkinAtomicGetHAnimHierarchCB, &anim);
+        return anim;
+    }
+}
+
+// name not from Android
+RpAtomic* SkinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data) {
+    *(RpHAnimHierarchy**)(data) = RpSkinAtomicGetHAnimHierarchy(atomic);
+    return nullptr;
+}
+
+RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
+    if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+        if (RpHAnimHierarchy* hier = RpSkinAtomicGetHAnimHierarchy(atomic)) {
+            RtAnimAnimation*& currAnim = hier->currentAnim->pCurrentAnim;
+            if (currAnim) {
+                RtAnimAnimationDestroy(currAnim);
+            }
+            currAnim = nullptr;
+        }
+    }
+    return atomic;
+}
+
+RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* sphere, bool bUseLTM) {
+    return ((RpClump * (__cdecl*)(RpClump*, RwSphere*, bool))(g_libGTASA + 0x5FF7F4))(clump, sphere, bUseLTM);
+}

@@ -1,0 +1,53 @@
+# Android / Gradle
+.gradle/
+build/
+app/build/
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Android Studio / IntelliJ
+*.iml
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Local environment
+local.properties
+.DS_Store
+Thumbs.db
+
+# Signing / private keys
+app/keys/
+*.jks
+*.keystore
+*.pem
+*.key
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+app/debug/
+app/release/
+
+# Archives / large local packages
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+/GTA_2.11.311-OP.zip
+/app/src/main/cpp.zip
+
+# Logs
+*.log
+crashlytics-build.properties
+
+# Native temporary files
+*.o
+*.obj
+*.so.dbg

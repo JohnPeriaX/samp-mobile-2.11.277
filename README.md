@@ -3,8 +3,52 @@
 </p>
 
 <p align="center">
-  <img src="https://socialify.git.ci/JohnPeriaX/samp-mobile-2.11.311/image?description=1&descriptionEditable=Android%20%2B%20JNI%20%2B%20C%2B%2B%20Cyber%20Space%20Research%20Snapshot&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Dark" alt="Project Showcase">
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311">
+    <img src="https://img.shields.io/badge/samp-mobile-2.11.311-00F5FF?style=for-the-badge&logo=github&logoColor=020617&labelColor=020617" alt="Repository Name">
+  </a>
 </p>
+
+<p align="center">
+  <b>Live GitHub Repository Card</b><br>
+  <sub>Values below are pulled from GitHub through Shields.io and refresh automatically.</sub>
+</p>
+
+<table align="center">
+  <tr>
+    <td align="center" colspan="5">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311"><b>🔮 samp-mobile-2.11.311</b></a><br>
+      <sub>SAMP Mobile 2.11.311</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311">
+        <img src="https://img.shields.io/github/languages/top/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Language&logo=c&logoColor=white&color=64748B&labelColor=020617&cacheSeconds=300" alt="Top Language">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/stargazers">
+        <img src="https://img.shields.io/github/stars/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Stars&logo=github&logoColor=white&color=A78BFA&labelColor=020617&cacheSeconds=300" alt="GitHub Stars">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/watchers">
+        <img src="https://img.shields.io/github/watchers/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Watching&logo=github&logoColor=white&color=38BDF8&labelColor=020617&cacheSeconds=300" alt="GitHub Watchers">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/forks">
+        <img src="https://img.shields.io/github/forks/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Forks&logo=github&logoColor=white&color=7C3AED&labelColor=020617&cacheSeconds=300" alt="GitHub Forks">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/issues">
+        <img src="https://img.shields.io/github/issues/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Issues&logo=github&logoColor=white&color=F59E0B&labelColor=020617&cacheSeconds=300" alt="GitHub Issues">
+      </a>
+    </td>
+  </tr>
+</table>
+
 
 <h1 align="center">SAMP Mobile 2.11.311</h1>
 
@@ -54,45 +98,49 @@
 
 <p align="center">
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/stargazers">
-    <img src="https://img.shields.io/github/stars/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Stars&logo=github&color=00F5FF&labelColor=020617&cacheSeconds=60" alt="GitHub Stars">
+    <img src="https://img.shields.io/github/stars/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Stars&logo=github&color=00F5FF&labelColor=020617&cacheSeconds=300" alt="GitHub Stars">
   </a>
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/watchers">
-    <img src="https://img.shields.io/github/watchers/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Watching&logo=github&color=38BDF8&labelColor=020617&cacheSeconds=60" alt="GitHub Watchers">
+    <img src="https://img.shields.io/github/watchers/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Watching&logo=github&color=38BDF8&labelColor=020617&cacheSeconds=300" alt="GitHub Watchers">
   </a>
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/forks">
-    <img src="https://img.shields.io/github/forks/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Forks&logo=github&color=A78BFA&labelColor=020617&cacheSeconds=60" alt="GitHub Forks">
+    <img src="https://img.shields.io/github/forks/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Forks&logo=github&color=A78BFA&labelColor=020617&cacheSeconds=300" alt="GitHub Forks">
   </a>
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/issues">
-    <img src="https://img.shields.io/github/issues/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Issues&logo=github&color=F59E0B&labelColor=020617&cacheSeconds=60" alt="GitHub Issues">
+    <img src="https://img.shields.io/github/issues/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Issues&logo=github&color=F59E0B&labelColor=020617&cacheSeconds=300" alt="GitHub Issues">
   </a>
 </p>
 
 <p align="center">
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/pulls">
-    <img src="https://img.shields.io/github/issues-pr/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Pull%20Requests&logo=github&color=7C3AED&labelColor=020617&cacheSeconds=60" alt="GitHub Pull Requests">
+    <img src="https://img.shields.io/github/issues-pr/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Pull%20Requests&logo=github&color=7C3AED&labelColor=020617&cacheSeconds=300" alt="GitHub Pull Requests">
   </a>
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/commits/main">
-    <img src="https://img.shields.io/github/last-commit/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Last%20Commit&logo=git&color=22D3EE&labelColor=020617&cacheSeconds=60" alt="GitHub Last Commit">
+    <img src="https://img.shields.io/github/last-commit/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Last%20Commit&logo=git&color=22D3EE&labelColor=020617&cacheSeconds=300" alt="GitHub Last Commit">
   </a>
   <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Contributors&logo=github&color=06B6D4&labelColor=020617&cacheSeconds=60" alt="GitHub Contributors">
+    <img src="https://img.shields.io/github/contributors/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Contributors&logo=github&color=06B6D4&labelColor=020617&cacheSeconds=300" alt="GitHub Contributors">
   </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/repo-size/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Repo%20Size&color=00F5FF&labelColor=020617&cacheSeconds=60" alt="Repository Size">
-  <img src="https://img.shields.io/github/languages/top/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Top%20Language&color=A78BFA&labelColor=020617&cacheSeconds=60" alt="Top Language">
-  <img src="https://img.shields.io/github/license/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=License&color=38BDF8&labelColor=020617&cacheSeconds=60" alt="License">
+  <img src="https://img.shields.io/github/repo-size/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Repo%20Size&color=00F5FF&labelColor=020617&cacheSeconds=300" alt="Repository Size">
+  <img src="https://img.shields.io/github/languages/top/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Top%20Language&color=A78BFA&labelColor=020617&cacheSeconds=300" alt="Top Language">
+  <img src="https://img.shields.io/github/license/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=License&color=38BDF8&labelColor=020617&cacheSeconds=300" alt="License">
 </p>
 
 <p align="center">
-  <sub>Auto-updated from GitHub via dynamic shields. Values refresh automatically; GitHub / Shields image cache may delay changes briefly.</sub>
+  <sub>Auto-updated from GitHub via Shields.io. This is the closest README-safe realtime mode; GitHub and Shields image cache may delay changes briefly.</sub>
 </p>
 
 ---
 
 <p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=JohnPeriaX&repo=samp-mobile-2.11.311&theme=tokyonight&hide_border=true&bg_color=020617&title_color=00F5FF&text_color=E0F2FE&icon_color=A78BFA" alt="Repository Card">
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311">
+    <img src="https://img.shields.io/badge/Open%20Repository-020617?style=for-the-badge&logo=github&logoColor=00F5FF" alt="Open Repository">
+  </a>
+  <img src="https://img.shields.io/github/commit-activity/m/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Monthly%20Commits&logo=git&color=00F5FF&labelColor=020617&cacheSeconds=300" alt="Monthly Commit Activity">
+  <img src="https://img.shields.io/github/last-commit/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Last%20Commit&logo=git&color=22D3EE&labelColor=020617&cacheSeconds=300" alt="Last Commit">
 </p>
 
 <p align="center">

@@ -946,12 +946,49 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 // 0.3.7
 void Pickup(RPCParameters *rpcParams)
 {
+	Log::traceLastFunc("[RPC-IN] Pickup");
 
+	if (!pNetGame || !pNetGame->GetPickupPool() || !rpcParams) return;
+
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	if (!Data || iBitLength < static_cast<int>((sizeof(int) + sizeof(PICKUP)) * 8)) return;
+
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+	int pickupId = -1;
+	PICKUP pickup{};
+
+	if (!bsData.Read(pickupId)) return;
+	if (!bsData.Read(reinterpret_cast<char*>(&pickup), sizeof(PICKUP))) return;
+
+	Log::addParameter("pickupId", pickupId);
+	Log::addParameter("model", pickup.iModel);
+	Log::addParameter("type", pickup.iType);
+	Log::addParameter("x", pickup.pos.x);
+	Log::addParameter("y", pickup.pos.y);
+	Log::addParameter("z", pickup.pos.z);
+
+	pNetGame->GetPickupPool()->New(&pickup, pickupId);
 }
 // 0.3.7
 void DestroyPickup(RPCParameters *rpcParams)
 {
+	Log::traceLastFunc("[RPC-IN] DestroyPickup");
 
+	if (!pNetGame || !pNetGame->GetPickupPool() || !rpcParams) return;
+
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	if (!Data || iBitLength < static_cast<int>(sizeof(int) * 8)) return;
+
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+	int pickupId = -1;
+	if (!bsData.Read(pickupId)) return;
+
+	Log::addParameter("pickupId", pickupId);
+	pNetGame->GetPickupPool()->Destroy(pickupId);
 }
 // 0.3.7
 void Create3DTextLabel(RPCParameters* rpcParams)

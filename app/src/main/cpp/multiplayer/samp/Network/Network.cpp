@@ -573,6 +573,8 @@ void CNetGame::Packet_DisconnectionNotification(Packet *pkt)
 	if (pAudioStream) {
 		pAudioStream->Stop(true);
 	}
+
+	ResetPickupPool();
 	m_pRakClient->Disconnect(2000);
 
 	SpeakerList::Hide();

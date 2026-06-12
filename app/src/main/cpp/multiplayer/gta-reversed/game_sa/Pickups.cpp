@@ -33,8 +33,9 @@ void CPickups::Update() {
                 }
             }
             if (pickup.Update()) {
-               // CPickupPool *pPickups = pNetGame->GetPickupPool();
-               // pPickups->PickedUp( i );
+                if (pNetGame && pNetGame->GetPickupPool()) {
+                    pNetGame->GetPickupPool()->PickedUp(i);
+                }
             }
         } else {
             pickup.GetRidOfObjects();

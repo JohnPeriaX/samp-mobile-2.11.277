@@ -4,6 +4,9 @@
 #include "samp/Audio/AudioStream.h"
 #include "samp/Multiplayer/BuildingRemoval.h"
 
+#include <algorithm>
+#include <cstring>
+
 extern CGame *pGame;
 extern CNetGame *pNetGame;
 extern CAudioStream* pAudioStream;
@@ -1665,6 +1668,124 @@ void AttachCameraToObject(RPCParameters *rpcParams)
 
 }
 
+
+namespace
+{
+    bool ReadMenuFixedText(RakNet::BitStream& bsData, char* out, size_t outSize)
+    {
+        if (!out || outSize == 0) return false;
+        std::memset(out, 0, outSize);
+        return bsData.Read(out, MAX_MENU_LINE);
+    }
+
+    bool ReadMenuDWORDFlag(RakNet::BitStream& bsData, uint32_t& out)
+    {
+        out = 0;
+        return bsData.Read(out);
+    }
+}
+
+void ScrInitMenu(RPCParameters* rpcParams)
+{
+    Log::traceLastFunc("[RPC-IN] ScrInitMenu");
+
+    if (!pNetGame || !pNetGame->GetMenuPool() || !rpcParams) return;
+
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+    uint8_t menuId = 0;
+    uint32_t hasTwoColumnsFlag = 0;
+    char text[MAX_MENU_LINE + 1];
+    float x = 0.0f;
+    float y = 0.0f;
+    float col1Width = 0.0f;
+    float col2Width = 0.0f;
+    MENU_INT interaction{};
+
+    if (!bsData.Read(menuId)) return;
+    if (!ReadMenuDWORDFlag(bsData, hasTwoColumnsFlag)) return;
+    if (!ReadMenuFixedText(bsData, text, sizeof(text))) return;
+    if (!bsData.Read(x)) return;
+    if (!bsData.Read(y)) return;
+    if (!bsData.Read(col1Width)) return;
+
+    const bool hasTwoColumns = hasTwoColumnsFlag != 0;
+    if (hasTwoColumns && !bsData.Read(col2Width)) return;
+
+    if (!ReadMenuDWORDFlag(bsData, interaction.bMenu)) return;
+    for (uint8_t row = 0; row < MAX_MENU_ITEMS; ++row)
+    {
+        if (!ReadMenuDWORDFlag(bsData, interaction.bRow[row])) return;
+    }
+
+    CMenuPool* menuPool = pNetGame->GetMenuPool();
+    if (menuPool->GetSlotState(menuId))
+        menuPool->Delete(menuId);
+
+    CMenu* menu = menuPool->New(menuId, text, x, y, hasTwoColumns ? 2 : 1, col1Width, col2Width, &interaction);
+    if (!menu) return;
+
+    uint8_t rowCount = 0;
+    if (!ReadMenuFixedText(bsData, text, sizeof(text))) return;
+    menu->SetColumnTitle(0, text);
+
+    if (!bsData.Read(rowCount)) return;
+    rowCount = std::min<uint8_t>(rowCount, MAX_MENU_ITEMS);
+    for (uint8_t row = 0; row < rowCount; ++row)
+    {
+        if (!ReadMenuFixedText(bsData, text, sizeof(text))) return;
+        menu->AddMenuItem(0, row, text);
+    }
+
+    if (hasTwoColumns)
+    {
+        if (!ReadMenuFixedText(bsData, text, sizeof(text))) return;
+        menu->SetColumnTitle(1, text);
+
+        if (!bsData.Read(rowCount)) return;
+        rowCount = std::min<uint8_t>(rowCount, MAX_MENU_ITEMS);
+        for (uint8_t row = 0; row < rowCount; ++row)
+        {
+            if (!ReadMenuFixedText(bsData, text, sizeof(text))) return;
+            menu->AddMenuItem(1, row, text);
+        }
+    }
+}
+
+void ScrShowMenu(RPCParameters* rpcParams)
+{
+    Log::traceLastFunc("[RPC-IN] ScrShowMenu");
+
+    if (!pNetGame || !pNetGame->GetMenuPool() || !rpcParams) return;
+
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+    uint8_t menuId = INVALID_MENU_ID;
+    if (!bsData.Read(menuId)) return;
+
+    pNetGame->GetMenuPool()->ShowMenu(menuId);
+}
+
+void ScrHideMenu(RPCParameters* rpcParams)
+{
+    Log::traceLastFunc("[RPC-IN] ScrHideMenu");
+
+    if (!pNetGame || !pNetGame->GetMenuPool() || !rpcParams) return;
+
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+    uint8_t menuId = INVALID_MENU_ID;
+    if (!bsData.Read(menuId)) return;
+
+    pNetGame->GetMenuPool()->HideMenu(menuId);
+}
+
 void RegisterScriptRPCs(RakClientInterface *pRakClient)
 {
 	FLog("Registering script RPC's..");
@@ -1693,9 +1814,9 @@ void RegisterScriptRPCs(RakClientInterface *pRakClient)
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrRemoveComponent, ScrRemoveVehicleComponent);
 	// RPC_ScrForceClassSelection - useless
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrAttachObjectToPlayer, ScrAttachObjectToPlayer);
-	// RPC_ScrInitMenu
-	// RPC_ScrShowMenu
-	// RPC_ScrHideMenu
+	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrInitMenu, ScrInitMenu);
+	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowMenu, ScrShowMenu);
+	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideMenu, ScrHideMenu);
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerWantedLevel, ScrSetPlayerWantedLevel);
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw, ScrShowTextDraw);
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw, ScrHideTextDraw);
@@ -1794,4 +1915,8 @@ void UnregisterScriptRPCs(RakClientInterface *pRakClient)
 	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrRemoveBuilding);
 
 	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrInterpolateCamera);
+
+	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrInitMenu);
+	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrShowMenu);
+	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHideMenu);
 }

@@ -21,6 +21,7 @@ namespace
     constexpr float kRowHeight = 22.0f;
     constexpr float kPaddingX = 8.0f;
     constexpr float kBorder = 1.0f;
+    constexpr uint32_t kMenuActionCooldownMs = 250;
 
     constexpr uint8_t TOUCH_POP = 1;
     constexpr uint8_t TOUCH_PUSH = 2;
@@ -45,6 +46,7 @@ CMenu::CMenu(const char* title, float x, float y, uint8_t columns,
     std::memset(m_szTitle, 0, sizeof(m_szTitle));
     std::memset(m_szItems, 0, sizeof(m_szItems));
     std::memset(m_szHeader, 0, sizeof(m_szHeader));
+    std::memset(m_byteColumnRowCount, 0, sizeof(m_byteColumnRowCount));
     std::memset(&m_menuInteraction, 0, sizeof(m_menuInteraction));
 
     CopyMenuText(m_szTitle, title, sizeof(m_szTitle));
@@ -53,8 +55,8 @@ CMenu::CMenu(const char* title, float x, float y, uint8_t columns,
     m_fYPos = y;
     m_fCol1Width = std::max(1.0f, col1Width);
     m_fCol2Width = std::max(1.0f, col2Width);
-    m_byteColumns = columns == 2 ? 2 : 1;
-    m_byteSelectedRow = 0;
+    m_byteColumns = columns >= 2 ? 2 : 1;
+    m_byteSelectedRow = INVALID_MENU_ROW;
     m_bVisible = false;
 
     if (interaction)
@@ -98,13 +100,16 @@ float CMenu::MenuWidth() const
 
 float CMenu::MenuHeight() const
 {
-    return ScaleY(kTitleHeight + kHeaderHeight + (kRowHeight * MAX_MENU_ITEMS));
+    const uint8_t rows = std::max<uint8_t>(1, GetMaxRowCount());
+    return ScaleY(kTitleHeight + kHeaderHeight + (kRowHeight * rows));
 }
 
 void CMenu::AddMenuItem(uint8_t column, uint8_t row, const char* text)
 {
     if (column >= MAX_MENU_COLUMNS || row >= MAX_MENU_ITEMS) return;
+
     CopyMenuText(m_szItems[row][column], text, sizeof(m_szItems[row][column]));
+    m_byteColumnRowCount[column] = std::max<uint8_t>(m_byteColumnRowCount[column], row + 1);
 }
 
 void CMenu::SetColumnTitle(uint8_t column, const char* text)
@@ -116,7 +121,7 @@ void CMenu::SetColumnTitle(uint8_t column, const char* text)
 void CMenu::Show()
 {
     m_bVisible = true;
-    m_byteSelectedRow = 0;
+    m_byteSelectedRow = FindFirstSelectableRow();
 }
 
 void CMenu::Hide()
@@ -136,15 +141,76 @@ const char* CMenu::GetMenuHeader(uint8_t column) const
     return m_szHeader[column];
 }
 
+uint8_t CMenu::GetSelectedRow() const
+{
+    if (!CanSelect() || m_byteSelectedRow >= MAX_MENU_ITEMS || !IsRowEnabled(m_byteSelectedRow))
+        return INVALID_MENU_ROW;
+    return m_byteSelectedRow;
+}
+
+uint8_t CMenu::GetColumnRowCount(uint8_t column) const
+{
+    if (column >= MAX_MENU_COLUMNS) return 0;
+    return m_byteColumnRowCount[column];
+}
+
+uint8_t CMenu::GetMaxRowCount() const
+{
+    uint8_t count = 0;
+    for (uint8_t column = 0; column < m_byteColumns; ++column)
+        count = std::max<uint8_t>(count, m_byteColumnRowCount[column]);
+
+    if (count == 0)
+    {
+        for (uint8_t row = 0; row < MAX_MENU_ITEMS; ++row)
+        {
+            if (IsRowEnabled(row))
+                count = row + 1;
+        }
+    }
+
+    return std::min<uint8_t>(count == 0 ? 1 : count, MAX_MENU_ITEMS);
+}
+
 bool CMenu::IsRowEnabled(uint8_t row) const
 {
-    return row < MAX_MENU_ITEMS && m_menuInteraction.bRow[row];
+    return row < MAX_MENU_ITEMS && m_menuInteraction.bRow[row] != 0;
+}
+
+bool CMenu::HasAnySelectableRow() const
+{
+    return FindFirstSelectableRow() != INVALID_MENU_ROW;
+}
+
+uint8_t CMenu::FindFirstSelectableRow() const
+{
+    if (!CanSelect()) return INVALID_MENU_ROW;
+
+    for (uint8_t row = 0; row < MAX_MENU_ITEMS; ++row)
+    {
+        if (IsRowEnabled(row))
+            return row;
+    }
+
+    return INVALID_MENU_ROW;
 }
 
 void CMenu::SetSelectedRow(uint8_t row)
 {
     if (row >= MAX_MENU_ITEMS || !IsRowEnabled(row)) return;
     m_byteSelectedRow = row;
+}
+
+bool CMenu::HitTestMenu(float x, float y) const
+{
+    if (!m_bVisible) return false;
+
+    const float menuX = ScaleX(m_fXPos);
+    const float menuY = ScaleY(m_fYPos);
+    const float width = MenuWidth();
+    const float height = MenuHeight();
+
+    return x >= menuX && x <= menuX + width && y >= menuY && y <= menuY + height;
 }
 
 int CMenu::HitTestRow(float x, float y) const
@@ -156,12 +222,13 @@ int CMenu::HitTestRow(float x, float y) const
     const float width = MenuWidth();
     const float rowTop = menuY + ScaleY(kTitleHeight + kHeaderHeight);
     const float rowHeight = ScaleY(kRowHeight);
+    const uint8_t rowCount = GetMaxRowCount();
 
-    if (x < menuX || x > menuX + width || y < rowTop || y > rowTop + rowHeight * MAX_MENU_ITEMS)
+    if (x < menuX || x > menuX + width || y < rowTop || y > rowTop + rowHeight * rowCount)
         return -1;
 
     const int row = static_cast<int>((y - rowTop) / rowHeight);
-    return row >= 0 && row < MAX_MENU_ITEMS ? row : -1;
+    return row >= 0 && row < rowCount && row < MAX_MENU_ITEMS ? row : -1;
 }
 
 void CMenu::Render(ImGuiRenderer* renderer)
@@ -177,6 +244,7 @@ void CMenu::Render(ImGuiRenderer* renderer)
     const float padX = ScaleX(kPaddingX);
     const float fontSize = UISettings::fontSize() * 0.45f;
     const float titleFontSize = UISettings::fontSize() * 0.52f;
+    const uint8_t rowCount = GetMaxRowCount();
 
     const ImVec2 min(menuX, menuY);
     const ImVec2 max(menuX + width, menuY + MenuHeight());
@@ -196,7 +264,7 @@ void CMenu::Render(ImGuiRenderer* renderer)
         colX += colW;
     }
 
-    for (uint8_t row = 0; row < MAX_MENU_ITEMS; ++row)
+    for (uint8_t row = 0; row < rowCount; ++row)
     {
         const float rowY = menuY + titleH + headerH + (rowH * row);
         const bool enabled = IsRowEnabled(row);
@@ -217,18 +285,32 @@ void CMenu::Render(ImGuiRenderer* renderer)
     }
 }
 
-bool CMenu::OnTouchEvent(int type, int x, int y)
+bool CMenu::OnTouchEvent(int type, int x, int y, bool* shouldQuit, bool* shouldSelect)
 {
+    if (shouldQuit) *shouldQuit = false;
+    if (shouldSelect) *shouldSelect = false;
     if (!m_bVisible) return false;
 
-    const int row = HitTestRow(static_cast<float>(x), static_cast<float>(y));
+    const float fx = static_cast<float>(x);
+    const float fy = static_cast<float>(y);
+    const int row = HitTestRow(fx, fy);
+
     if (row >= 0 && IsRowEnabled(static_cast<uint8_t>(row)))
     {
         SetSelectedRow(static_cast<uint8_t>(row));
-        return type == TOUCH_POP;
+        if (type == TOUCH_POP && shouldSelect)
+            *shouldSelect = true;
+        return true;
     }
 
-    return type == TOUCH_PUSH || type == TOUCH_POP;
+    if (!HitTestMenu(fx, fy))
+    {
+        if (type == TOUCH_POP && shouldQuit)
+            *shouldQuit = true;
+        return type == TOUCH_PUSH || type == TOUCH_POP;
+    }
+
+    return true;
 }
 
 CMenuPool::CMenuPool()
@@ -237,10 +319,12 @@ CMenuPool::CMenuPool()
     {
         m_pMenus[menuId] = nullptr;
         m_bMenuSlotState[menuId] = false;
+        m_bPendingShow[menuId] = false;
     }
 
     m_byteCurrentMenu = INVALID_MENU_ID;
     m_bExited = false;
+    m_dwLastMenuActionTick = 0;
 }
 
 CMenuPool::~CMenuPool()
@@ -248,32 +332,49 @@ CMenuPool::~CMenuPool()
     Reset();
 }
 
+void CMenuPool::ClearSlot(uint8_t menuId)
+{
+    if (!IsMenuIdValid(menuId)) return;
+
+    if (m_pMenus[menuId])
+    {
+        delete m_pMenus[menuId];
+        m_pMenus[menuId] = nullptr;
+    }
+
+    m_bMenuSlotState[menuId] = false;
+    m_bPendingShow[menuId] = false;
+
+    if (m_byteCurrentMenu == menuId)
+        m_byteCurrentMenu = INVALID_MENU_ID;
+}
+
 CMenu* CMenuPool::New(uint8_t menuId, const char* title, float x, float y, uint8_t columns,
                       float col1Width, float col2Width, const MENU_INT* interaction)
 {
-    if (menuId >= MAX_MENUS) return nullptr;
+    if (!IsMenuIdValid(menuId)) return nullptr;
 
-    Delete(menuId);
+    const bool showAfterInit = m_bPendingShow[menuId];
+    ClearSlot(menuId);
 
     CMenu* menu = new CMenu(title, x, y, columns, col1Width, col2Width, interaction);
     if (!menu) return nullptr;
 
     m_pMenus[menuId] = menu;
     m_bMenuSlotState[menuId] = true;
+
+    if (showAfterInit)
+        ShowMenu(menuId);
+
     return menu;
 }
 
 bool CMenuPool::Delete(uint8_t menuId)
 {
-    if (menuId >= MAX_MENUS || !m_bMenuSlotState[menuId] || !m_pMenus[menuId])
+    if (!IsMenuIdValid(menuId) || !m_bMenuSlotState[menuId] || !m_pMenus[menuId])
         return false;
 
-    if (m_byteCurrentMenu == menuId)
-        m_byteCurrentMenu = INVALID_MENU_ID;
-
-    delete m_pMenus[menuId];
-    m_pMenus[menuId] = nullptr;
-    m_bMenuSlotState[menuId] = false;
+    ClearSlot(menuId);
     return true;
 }
 
@@ -290,9 +391,15 @@ bool CMenuPool::GetSlotState(uint8_t menuId) const
 
 void CMenuPool::ShowMenu(uint8_t menuId)
 {
-    if (!GetSlotState(menuId)) return;
+    if (!IsMenuIdValid(menuId)) return;
 
-    if (m_byteCurrentMenu != INVALID_MENU_ID && GetSlotState(m_byteCurrentMenu))
+    if (!GetSlotState(menuId))
+    {
+        m_bPendingShow[menuId] = true;
+        return;
+    }
+
+    if (m_byteCurrentMenu != INVALID_MENU_ID && GetSlotState(m_byteCurrentMenu) && m_byteCurrentMenu != menuId)
         m_pMenus[m_byteCurrentMenu]->Hide();
 
     m_pMenus[menuId]->Show();
@@ -302,8 +409,16 @@ void CMenuPool::ShowMenu(uint8_t menuId)
 
 void CMenuPool::HideMenu(uint8_t menuId)
 {
-    if (menuId >= MAX_MENUS || m_byteCurrentMenu == INVALID_MENU_ID) return;
-    if (!GetSlotState(menuId)) return;
+    if (!IsMenuIdValid(menuId)) return;
+
+    m_bPendingShow[menuId] = false;
+
+    if (!GetSlotState(menuId))
+    {
+        if (m_byteCurrentMenu == menuId)
+            m_byteCurrentMenu = INVALID_MENU_ID;
+        return;
+    }
 
     m_pMenus[menuId]->Hide();
     if (m_byteCurrentMenu == menuId)
@@ -313,17 +428,11 @@ void CMenuPool::HideMenu(uint8_t menuId)
 void CMenuPool::Reset()
 {
     for (uint8_t menuId = 0; menuId < MAX_MENUS; ++menuId)
-    {
-        if (m_pMenus[menuId])
-        {
-            delete m_pMenus[menuId];
-            m_pMenus[menuId] = nullptr;
-        }
-        m_bMenuSlotState[menuId] = false;
-    }
+        ClearSlot(menuId);
 
     m_byteCurrentMenu = INVALID_MENU_ID;
     m_bExited = false;
+    m_dwLastMenuActionTick = 0;
 }
 
 void CMenuPool::Process()
@@ -333,6 +442,9 @@ void CMenuPool::Process()
         HideMenu(m_byteCurrentMenu);
         m_bExited = false;
     }
+
+    if (m_byteCurrentMenu != INVALID_MENU_ID && !GetSlotState(m_byteCurrentMenu))
+        m_byteCurrentMenu = INVALID_MENU_ID;
 }
 
 void CMenuPool::Render(ImGuiRenderer* renderer)
@@ -346,33 +458,69 @@ bool CMenuPool::OnTouchEvent(int type, int x, int y)
     if (m_byteCurrentMenu == INVALID_MENU_ID || !GetSlotState(m_byteCurrentMenu)) return false;
 
     CMenu* menu = m_pMenus[m_byteCurrentMenu];
-    const bool shouldSelect = menu->OnTouchEvent(type, x, y);
-    if (shouldSelect && type == TOUCH_POP && menu->CanSelect())
-    {
-        const uint8_t row = menu->GetSelectedRow();
-        if (row != INVALID_MENU_ID && menu->IsRowEnabled(row))
-        {
-            SendMenuSelect(row);
-            m_bExited = true;
-        }
-    }
+    bool shouldQuit = false;
+    bool shouldSelect = false;
+    const bool handled = menu->OnTouchEvent(type, x, y, &shouldQuit, &shouldSelect);
 
+    if (shouldSelect && type == TOUCH_POP)
+        SubmitCurrentSelection();
+    else if (shouldQuit && type == TOUCH_POP)
+        ExitCurrentMenu();
+
+    return handled;
+}
+
+bool CMenuPool::SubmitCurrentSelection()
+{
+    if (m_byteCurrentMenu == INVALID_MENU_ID || !GetSlotState(m_byteCurrentMenu)) return false;
+
+    CMenu* menu = m_pMenus[m_byteCurrentMenu];
+    if (!menu || !menu->CanSelect()) return false;
+
+    const uint8_t row = menu->GetSelectedRow();
+    if (row == INVALID_MENU_ROW || !menu->IsRowEnabled(row)) return false;
+
+    SendMenuSelect(row);
+    m_bExited = true;
     return true;
+}
+
+bool CMenuPool::ExitCurrentMenu()
+{
+    if (m_byteCurrentMenu == INVALID_MENU_ID || !GetSlotState(m_byteCurrentMenu)) return false;
+
+    SendMenuQuit();
+    m_bExited = true;
+    return true;
+}
+
+bool CMenuPool::CanSendMenuAction() const
+{
+    const uint32_t now = GetTickCount();
+    return m_dwLastMenuActionTick == 0 || now - m_dwLastMenuActionTick >= kMenuActionCooldownMs;
+}
+
+void CMenuPool::MarkMenuActionSent()
+{
+    m_dwLastMenuActionTick = GetTickCount();
 }
 
 void CMenuPool::SendMenuSelect(uint8_t row)
 {
-    if (!pNetGame || !pNetGame->GetRakClient()) return;
+    if (!pNetGame || !pNetGame->GetRakClient() || !CanSendMenuAction()) return;
 
     RakNet::BitStream bsSend;
     bsSend.Write(row);
     pNetGame->GetRakClient()->RPC(&RPC_MenuSelect, &bsSend, HIGH_PRIORITY, RELIABLE, 0, false, UNASSIGNED_NETWORK_ID, nullptr);
+    MarkMenuActionSent();
 }
 
 void CMenuPool::SendMenuQuit()
 {
-    if (!pNetGame || !pNetGame->GetRakClient()) return;
+    if (!pNetGame || !pNetGame->GetRakClient() || !CanSendMenuAction()) return;
+
     pNetGame->GetRakClient()->RPC(&RPC_MenuQuit, nullptr, HIGH_PRIORITY, RELIABLE, 0, false, UNASSIGNED_NETWORK_ID, nullptr);
+    MarkMenuActionSent();
 }
 
 char* CMenuPool::GetTextPointer(const char* name)

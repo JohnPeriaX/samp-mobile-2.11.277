@@ -136,6 +136,7 @@ void CNetGame::InitializePools()
 	m_pPools->pPlayerBubblePool = new CPlayerBubblePool();
 	m_pPools->pObjectPool = new CObjectPool();
 	m_pPools->pPickupPool = new CPickupPool();
+	m_pPools->pActorPool = new CActorPool();
 	m_pPools->pTextLabelPool = new C3DTextLabelPool();
 }
 
@@ -163,6 +164,12 @@ void CNetGame::UninitializePools()
 	{
 		delete m_pPools->pPickupPool;
 		m_pPools->pPickupPool = nullptr;
+	}
+
+	if (m_pPools->pActorPool)
+	{
+		delete m_pPools->pActorPool;
+		m_pPools->pActorPool = nullptr;
 	}
 
 	if (m_pPools->pPlayerBubblePool)
@@ -1027,7 +1034,8 @@ void CNetGame::ResetVehiclePool()
 // 0.3.7
 void CNetGame::ResetActorPool()
 {
-
+	if (m_pPools && m_pPools->pActorPool)
+		m_pPools->pActorPool->Reset();
 }
 // 0.3.7
 void CNetGame::ResetTextDrawPool()

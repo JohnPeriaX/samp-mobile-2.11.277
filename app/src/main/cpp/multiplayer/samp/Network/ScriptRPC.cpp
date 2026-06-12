@@ -1493,27 +1493,124 @@ void ScrSetPlayerAttachedObject(RPCParameters* rpcParams)
 // 0.3.7
 void ScrApplyActorAnimation(RPCParameters* rpcParams)
 {
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
 
+	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
+	if (!pActorPool) return;
+
+	char szAnimLib[256];
+	char szAnimName[256];
+	memset(szAnimLib, 0, sizeof(szAnimLib));
+	memset(szAnimName, 0, sizeof(szAnimName));
+
+	PLAYERID ActorID;
+	uint8_t byteAnimLibLen;
+	uint8_t byteAnimNameLen;
+	float fDelta;
+	bool bLoop;
+	bool bLockX;
+	bool bLockY;
+	bool bFreeze;
+	int iTime;
+
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+	bsData.Read(ActorID);
+	bsData.Read(byteAnimLibLen);
+	if (byteAnimLibLen >= sizeof(szAnimLib)) return;
+	bsData.Read(szAnimLib, byteAnimLibLen);
+	bsData.Read(byteAnimNameLen);
+	if (byteAnimNameLen >= sizeof(szAnimName)) return;
+	bsData.Read(szAnimName, byteAnimNameLen);
+	bsData.Read(fDelta);
+	bsData.Read(bLoop);
+	bsData.Read(bLockX);
+	bsData.Read(bLockY);
+	bsData.Read(bFreeze);
+	bsData.Read(iTime);
+
+	szAnimLib[byteAnimLibLen] = '\0';
+	szAnimName[byteAnimNameLen] = '\0';
+
+	CActor* pActor = pActorPool->GetAt(ActorID);
+	if (pActor)
+		pActor->ApplyAnimation(szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
 }
 // 0.3.7
 void ScrClearActorAnimation(RPCParameters* rpcParams)
 {
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
 
+	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
+	if (!pActorPool) return;
+
+	PLAYERID ActorID;
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+	bsData.Read(ActorID);
+
+	CActor* pActor = pActorPool->GetAt(ActorID);
+	if (pActor)
+		pActor->ClearAnimation();
 }
 // 0.3.7
 void ScrSetActorFacingAngle(RPCParameters* rpcParams)
 {
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
 
+	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
+	if (!pActorPool) return;
+
+	PLAYERID ActorID;
+	float fAngle;
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+	bsData.Read(ActorID);
+	bsData.Read(fAngle);
+
+	CActor* pActor = pActorPool->GetAt(ActorID);
+	if (pActor)
+		pActor->ForceTargetRotation(fAngle);
 }
 // 0.3.7
 void ScrSetActorPos(RPCParameters* rpcParams)
 {
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
 
+	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
+	if (!pActorPool) return;
+
+	PLAYERID ActorID;
+	CVector vecPos;
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+	bsData.Read(ActorID);
+	bsData.Read(vecPos.x);
+	bsData.Read(vecPos.y);
+	bsData.Read(vecPos.z);
+
+	CActor* pActor = pActorPool->GetAt(ActorID);
+	if (pActor && pActor->m_pPed)
+		pActor->m_pPed->SetPosn(vecPos.x, vecPos.y, vecPos.z);
 }
 // 0.3.7
 void ScrSetActorHealth(RPCParameters* rpcParams)
 {
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
 
+	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
+	if (!pActorPool) return;
+
+	PLAYERID ActorID;
+	float fHealth;
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+	bsData.Read(ActorID);
+	bsData.Read(fHealth);
+
+	CActor* pActor = pActorPool->GetAt(ActorID);
+	if (pActor)
+		pActor->SetHealth(fHealth);
 }
 
 void ScrPlayAudioStream(RPCParameters* rpcParams)

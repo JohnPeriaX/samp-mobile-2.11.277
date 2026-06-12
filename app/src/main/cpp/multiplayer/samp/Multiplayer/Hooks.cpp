@@ -82,8 +82,8 @@ PLAYERID FindPlayerIDFromGtaPtr(CEntityGTA* pEntity)
 // 0.3.7
 PLAYERID FindActorIDFromGtaPtr(CPedGTA* pPed)
 {
-	if (pPed) {
-		//return pNetGame->GetActorPool()->FindIDFromGtaPtr(pPed);
+	if (pPed && pNetGame && pNetGame->GetActorPool()) {
+		return pNetGame->GetActorPool()->FindIDFromGtaPtr(pPed);
 	}
 
 	return INVALID_PLAYER_ID;
@@ -770,7 +770,7 @@ bool ComputeDamageResponse(CPedDamageResponseCalculator* calculator, CPedGTA* pP
 		{
 			PLAYERID ActorID = FindActorIDFromGtaPtr(pPed);
 			if (ActorID != INVALID_PLAYER_ID) {
-				pLocalPlayer->SendGiveDamageEvent(ActorID,
+				pLocalPlayer->SendGiveDamageActorEvent(ActorID,
 												  calculator->m_fDamageFactor,
 												  calculator->m_weaponType,
 												  calculator->m_pedPieceType);

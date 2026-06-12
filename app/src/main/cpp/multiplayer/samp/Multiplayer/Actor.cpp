@@ -95,15 +95,12 @@ void CActor::ApplyAnimation(const char* szAnimName, const char* szAnimLib, float
 // 0.3.7
 void CActor::ClearAnimation()
 {
-	if (m_pPed) {
-		// CPedIntelligence::FlushImmediately
-		//((void (*)(PED_TASKS_TYPE*, bool))(g_libGTASA + 0x4C0A44 + 1))(m_pPed->Tasks, true);
+	if (m_pPed && GamePool_Ped_GetAt(m_dwGTAId)) {
+		ScriptCommand(&clear_char_tasks, m_dwGTAId);
 	}
 }
 // 0.3.7
 void CActor::SetFacingAngle(float fAngle)
 {
-	if (m_pPed && GamePool_Ped_GetAt(m_dwGTAId)) {
-		m_pPed->m_fAimingRotation = DegToRad(fAngle);
-	}
+	ForceTargetRotation(fAngle);
 }

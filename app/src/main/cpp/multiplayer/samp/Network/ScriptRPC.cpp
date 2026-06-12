@@ -3,7 +3,6 @@
 #include "Network.h"
 #include "samp/Audio/AudioStream.h"
 #include "samp/Multiplayer/BuildingRemoval.h"
-#include <algorithm>
 
 extern CGame *pGame;
 extern CNetGame *pNetGame;
@@ -1494,124 +1493,129 @@ void ScrSetPlayerAttachedObject(RPCParameters* rpcParams)
 // 0.3.7
 void ScrApplyActorAnimation(RPCParameters* rpcParams)
 {
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
+    if (!pNetGame || !rpcParams) return;
 
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
 
-	char szAnimLib[256];
-	char szAnimName[256];
-	memset(szAnimLib, 0, sizeof(szAnimLib));
-	memset(szAnimName, 0, sizeof(szAnimName));
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	PLAYERID ActorID;
-	uint8_t byteAnimLibLen;
-	uint8_t byteAnimNameLen;
-	float fDelta;
-	bool bLoop;
-	bool bLockX;
-	bool bLockY;
-	bool bFreeze;
-	int iTime;
+    PLAYERID ActorID;
+    uint8_t byteAnimLibLen;
+    uint8_t byteAnimNameLen;
+    float fDelta;
+    bool bLoop;
+    bool bLockX;
+    bool bLockY;
+    bool bFreeze;
+    int iTime;
 
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
-	bsData.Read(byteAnimLibLen);
-	if (byteAnimLibLen >= sizeof(szAnimLib)) return;
-	bsData.Read(szAnimLib, byteAnimLibLen);
-	bsData.Read(byteAnimNameLen);
-	if (byteAnimNameLen >= sizeof(szAnimName)) return;
-	bsData.Read(szAnimName, byteAnimNameLen);
-	bsData.Read(fDelta);
-	bsData.Read(bLoop);
-	bsData.Read(bLockX);
-	bsData.Read(bLockY);
-	bsData.Read(bFreeze);
-	bsData.Read(iTime);
+    char szAnimLib[64];
+    char szAnimName[64];
+    memset(szAnimLib, 0, sizeof(szAnimLib));
+    memset(szAnimName, 0, sizeof(szAnimName));
 
-	szAnimLib[byteAnimLibLen] = '\0';
-	szAnimName[byteAnimNameLen] = '\0';
+    if (!bsData.Read(ActorID)) return;
+    if (!bsData.Read(byteAnimLibLen)) return;
+    if (byteAnimLibLen == 0 || byteAnimLibLen >= sizeof(szAnimLib)) return;
+    if (!bsData.Read(szAnimLib, byteAnimLibLen)) return;
+    szAnimLib[byteAnimLibLen] = '\0';
 
-	CActor* pActor = pActorPool->GetAt(ActorID);
-	if (pActor)
-		pActor->ApplyAnimation(szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
+    if (!bsData.Read(byteAnimNameLen)) return;
+    if (byteAnimNameLen == 0 || byteAnimNameLen >= sizeof(szAnimName)) return;
+    if (!bsData.Read(szAnimName, byteAnimNameLen)) return;
+    szAnimName[byteAnimNameLen] = '\0';
+
+    if (!bsData.Read(fDelta)) return;
+    if (!bsData.Read(bLoop)) return;
+    if (!bsData.Read(bLockX)) return;
+    if (!bsData.Read(bLockY)) return;
+    if (!bsData.Read(bFreeze)) return;
+    if (!bsData.Read(iTime)) return;
+
+    pActorPool->ApplyAnimation(ActorID, szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
 }
+
 // 0.3.7
 void ScrClearActorAnimation(RPCParameters* rpcParams)
 {
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
+    if (!pNetGame || !rpcParams) return;
 
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
 
-	PLAYERID ActorID;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	CActor* pActor = pActorPool->GetAt(ActorID);
-	if (pActor)
-		pActor->ClearAnimation();
+    PLAYERID ActorID;
+    if (!bsData.Read(ActorID)) return;
+
+    pActorPool->ClearAnimation(ActorID);
 }
+
 // 0.3.7
 void ScrSetActorFacingAngle(RPCParameters* rpcParams)
 {
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
+    if (!pNetGame || !rpcParams) return;
 
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
 
-	PLAYERID ActorID;
-	float fAngle;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
-	bsData.Read(fAngle);
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	CActor* pActor = pActorPool->GetAt(ActorID);
-	if (pActor)
-		pActor->ForceTargetRotation(fAngle);
+    PLAYERID ActorID;
+    float fAngle;
+    if (!bsData.Read(ActorID)) return;
+    if (!bsData.Read(fAngle)) return;
+
+    pActorPool->SetFacingAngle(ActorID, fAngle);
 }
+
 // 0.3.7
 void ScrSetActorPos(RPCParameters* rpcParams)
 {
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
+    if (!pNetGame || !rpcParams) return;
 
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
 
-	PLAYERID ActorID;
-	CVector vecPos;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
-	bsData.Read(vecPos.x);
-	bsData.Read(vecPos.y);
-	bsData.Read(vecPos.z);
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	CActor* pActor = pActorPool->GetAt(ActorID);
-	if (pActor && pActor->m_pPed)
-		pActor->m_pPed->SetPosn(vecPos.x, vecPos.y, vecPos.z);
+    PLAYERID ActorID;
+    CVector vecPos;
+    if (!bsData.Read(ActorID)) return;
+    if (!bsData.Read(vecPos.x)) return;
+    if (!bsData.Read(vecPos.y)) return;
+    if (!bsData.Read(vecPos.z)) return;
+
+    pActorPool->SetPosition(ActorID, vecPos);
 }
+
 // 0.3.7
 void ScrSetActorHealth(RPCParameters* rpcParams)
 {
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
+    if (!pNetGame || !rpcParams) return;
 
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
 
-	PLAYERID ActorID;
-	float fHealth;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
-	bsData.Read(fHealth);
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	CActor* pActor = pActorPool->GetAt(ActorID);
-	if (pActor)
-		pActor->SetHealth(fHealth);
+    PLAYERID ActorID;
+    float fHealth;
+    if (!bsData.Read(ActorID)) return;
+    if (!bsData.Read(fHealth)) return;
+
+    pActorPool->SetHealth(ActorID, fHealth);
 }
 
 void ScrPlayAudioStream(RPCParameters* rpcParams)
@@ -1661,108 +1665,6 @@ void AttachCameraToObject(RPCParameters *rpcParams)
 
 }
 
-void ScrInitMenu(RPCParameters* rpcParams)
-{
-	Log::traceLastFunc("[RPC-IN] ScrInitMenu");
-
-	if (!pNetGame || !pNetGame->GetMenuPool()) return;
-
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	uint8_t menuId = 0;
-	bool hasTwoColumns = false;
-	char text[MAX_MENU_LINE];
-	float x = 0.0f;
-	float y = 0.0f;
-	float col1Width = 0.0f;
-	float col2Width = 0.0f;
-	MENU_INT interaction{};
-
-	memset(text, 0, sizeof(text));
-
-	bsData.Read(menuId);
-	bsData.Read(hasTwoColumns);
-	bsData.Read(text, MAX_MENU_LINE);
-	bsData.Read(x);
-	bsData.Read(y);
-	bsData.Read(col1Width);
-	if (hasTwoColumns)
-		bsData.Read(col2Width);
-
-	bsData.Read(interaction.bMenu);
-	for (uint8_t row = 0; row < MAX_MENU_ITEMS; ++row)
-		bsData.Read(interaction.bRow[row]);
-
-	CMenuPool* menuPool = pNetGame->GetMenuPool();
-	if (menuPool->GetSlotState(menuId))
-		menuPool->Delete(menuId);
-
-	CMenu* menu = menuPool->New(menuId, text, x, y, hasTwoColumns ? 2 : 1, col1Width, col2Width, &interaction);
-	if (!menu) return;
-
-	uint8_t rowCount = 0;
-	memset(text, 0, sizeof(text));
-	bsData.Read(text, MAX_MENU_LINE);
-	menu->SetColumnTitle(0, text);
-
-	bsData.Read(rowCount);
-	rowCount = std::min<uint8_t>(rowCount, MAX_MENU_ITEMS);
-	for (uint8_t row = 0; row < rowCount; ++row)
-	{
-		memset(text, 0, sizeof(text));
-		bsData.Read(text, MAX_MENU_LINE);
-		menu->AddMenuItem(0, row, text);
-	}
-
-	if (hasTwoColumns)
-	{
-		memset(text, 0, sizeof(text));
-		bsData.Read(text, MAX_MENU_LINE);
-		menu->SetColumnTitle(1, text);
-
-		bsData.Read(rowCount);
-		rowCount = std::min<uint8_t>(rowCount, MAX_MENU_ITEMS);
-		for (uint8_t row = 0; row < rowCount; ++row)
-		{
-			memset(text, 0, sizeof(text));
-			bsData.Read(text, MAX_MENU_LINE);
-			menu->AddMenuItem(1, row, text);
-		}
-	}
-}
-
-void ScrShowMenu(RPCParameters* rpcParams)
-{
-	Log::traceLastFunc("[RPC-IN] ScrShowMenu");
-
-	if (!pNetGame || !pNetGame->GetMenuPool()) return;
-
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	uint8_t menuId = 0;
-	bsData.Read(menuId);
-	pNetGame->GetMenuPool()->ShowMenu(menuId);
-}
-
-void ScrHideMenu(RPCParameters* rpcParams)
-{
-	Log::traceLastFunc("[RPC-IN] ScrHideMenu");
-
-	if (!pNetGame || !pNetGame->GetMenuPool()) return;
-
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	uint8_t menuId = 0;
-	bsData.Read(menuId);
-	pNetGame->GetMenuPool()->HideMenu(menuId);
-}
-
 void RegisterScriptRPCs(RakClientInterface *pRakClient)
 {
 	FLog("Registering script RPC's..");
@@ -1791,9 +1693,9 @@ void RegisterScriptRPCs(RakClientInterface *pRakClient)
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrRemoveComponent, ScrRemoveVehicleComponent);
 	// RPC_ScrForceClassSelection - useless
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrAttachObjectToPlayer, ScrAttachObjectToPlayer);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrInitMenu, ScrInitMenu);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowMenu, ScrShowMenu);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideMenu, ScrHideMenu);
+	// RPC_ScrInitMenu
+	// RPC_ScrShowMenu
+	// RPC_ScrHideMenu
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerWantedLevel, ScrSetPlayerWantedLevel);
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw, ScrShowTextDraw);
 	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw, ScrHideTextDraw);

@@ -2,34 +2,42 @@
 #include "samp/Multiplayer/Multiplayer.h"
 #include "gta-reversed/game_sa/Streaming.h"
 
+#include <stdexcept>
+#include <strings.h>
+
 extern CGame* pGame;
 
 // 0.3.7
 CActor::CActor(int iSkin, float fX, float fY, float fZ, float fAngle)
 {
-    if (!CStreaming::TryLoadModel(iSkin))
-        throw std::runtime_error("Model not loaded");
+    m_pPed = nullptr;
+    m_bInvulnerable = false;
+    m_dwGTAId = 0;
 
     if (!IsValidPedModel(iSkin))
-    {
         iSkin = 0;
-    }
+
+    if (!CStreaming::TryLoadModel(iSkin))
+        throw std::runtime_error("Actor model not loaded");
 
     ScriptCommand(&create_actor, 5, iSkin, fX, fY, fZ, &m_dwGTAId);
 
     m_pPed = GamePool_Ped_GetAt(m_dwGTAId);
+    if (!m_pPed || !IsValidGamePed(m_pPed))
+        return;
 
     ForceTargetRotation(fAngle);
     m_pPed->SetPosn(fX, fY, fZ);
 
     ScriptCommand(&set_actor_can_be_decapitated, m_dwGTAId, 0);
 }
+
 // 0.3.7
 CActor::~CActor()
 {
-    auto modelId = m_pPed->m_nModelIndex;
+    const int modelId = m_pPed ? m_pPed->m_nModelIndex : -1;
 
-    if (IsValidGamePed(m_pPed))
+    if (m_pPed && IsValidGamePed(m_pPed))
     {
         ((void (*)(CPedGTA*))(g_libGTASA + 0x5C1B10))(m_pPed);
     }
@@ -37,70 +45,71 @@ CActor::~CActor()
     m_pPed = nullptr;
     m_dwGTAId = 0;
 
-    CStreaming::RemoveModelIfNoRefs(modelId);
+    if (modelId >= 0)
+        CStreaming::RemoveModelIfNoRefs(modelId);
 }
+
 void CActor::ForceTargetRotation(float fRotation)
 {
-
     if (!m_pPed) return;
     if (!GamePool_Ped_GetAt(m_dwGTAId)) return;
 
     if (!IsValidGamePed(m_pPed))
-    {
         return;
-    }
 
     m_pPed->m_fCurrentRotation = DegToRad(fRotation);
     m_pPed->m_fAimingRotation = DegToRad(fRotation);
 
     ScriptCommand(&set_actor_z_angle, m_dwGTAId, fRotation);
 }
+
 // 0.3.7
 void CActor::SetHealth(float fHealth)
 {
-	if (m_pPed) {
-		m_pPed->m_fHealth = fHealth;
-	}
+    if (m_pPed && IsValidGamePed(m_pPed))
+        m_pPed->m_fHealth = fHealth;
 }
+
 // 0.3.7
 void CActor::SetInvulnerable(bool bInvulnerable)
 {
-	m_bInvulnerable = bInvulnerable;
+    m_bInvulnerable = bInvulnerable;
 
-	if (bInvulnerable) {
-		ScriptCommand(&set_actor_immunities, m_dwGTAId, 1, 1, 1, 1, 1);
-	}
-	else {
-		ScriptCommand(&set_actor_immunities, m_dwGTAId, 0, 0, 0, 0, 0);
-	}
+    if (!m_pPed || !GamePool_Ped_GetAt(m_dwGTAId)) return;
+
+    ScriptCommand(&set_actor_immunities, m_dwGTAId,
+                  bInvulnerable ? 1 : 0,
+                  bInvulnerable ? 1 : 0,
+                  bInvulnerable ? 1 : 0,
+                  bInvulnerable ? 1 : 0,
+                  bInvulnerable ? 1 : 0);
 }
+
 // 0.3.7 (adapted)
 void CActor::ApplyAnimation(const char* szAnimName, const char* szAnimLib, float fDelta,
-	int bLoop, int bLockX, int bLockY, int bFreeze, int iTime)
+    int bLoop, int bLockX, int bLockY, int bFreeze, int iTime)
 {
-	if (!m_pPed) return;
-	if (!GamePool_Ped_GetAt(m_dwGTAId)) return;
+    if (!m_pPed) return;
+    if (!GamePool_Ped_GetAt(m_dwGTAId)) return;
+    if (!szAnimName || !szAnimLib || !szAnimName[0] || !szAnimLib[0]) return;
 
-	if (!strcasecmp(szAnimLib, "SEX")) return;
+    if (!strcasecmp(szAnimLib, "SEX")) return;
 
-	if (!pGame->IsAnimationLoaded(szAnimLib)) {
-		pGame->RequestAnimation(szAnimLib);
+    if (!pGame->IsAnimationLoaded(szAnimLib))
+        pGame->RequestAnimation(szAnimLib);
 
-        ScriptCommand(&apply_animation, m_dwGTAId, szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
-		return;
-	}
-
-	ScriptCommand(&apply_animation, m_dwGTAId, szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
+    ScriptCommand(&apply_animation, m_dwGTAId, szAnimName, szAnimLib, fDelta, bLoop, bLockX, bLockY, bFreeze, iTime);
 }
+
 // 0.3.7
 void CActor::ClearAnimation()
 {
-	if (m_pPed && GamePool_Ped_GetAt(m_dwGTAId)) {
-		ScriptCommand(&clear_char_tasks, m_dwGTAId);
-	}
+    if (m_pPed && GamePool_Ped_GetAt(m_dwGTAId))
+        ScriptCommand(&clear_char_tasks, m_dwGTAId);
 }
+
 // 0.3.7
 void CActor::SetFacingAngle(float fAngle)
 {
-	ForceTargetRotation(fAngle);
+    ForceTargetRotation(fAngle);
 }

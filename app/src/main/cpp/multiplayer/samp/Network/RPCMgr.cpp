@@ -1400,12 +1400,48 @@ void VehicleParamsEx(RPCParameters* rpcParams)
 // 0.3.7
 void ShowActor(RPCParameters* rpcParams)
 {
+    Log::traceLastFunc("RPC: ShowActor");
 
+    if (!pNetGame || !rpcParams) return;
+
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
+
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+    NEW_ACTOR newActor;
+    memset(&newActor, 0, sizeof(NEW_ACTOR));
+
+    if (!bsData.Read((char*)&newActor, sizeof(NEW_ACTOR)))
+        return;
+
+    if (!pActorPool->IsValidActorId(newActor.ActorID))
+        return;
+
+    pActorPool->New(&newActor);
 }
+
 // 0.3.7
 void HideActor(RPCParameters* rpcParams)
 {
+    Log::traceLastFunc("RPC: HideActor");
 
+    if (!pNetGame || !rpcParams) return;
+
+    CActorPool* pActorPool = pNetGame->GetActorPool();
+    if (!pActorPool) return;
+
+    unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+    int iBitLength = rpcParams->numberOfBitsOfData;
+    RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+    PLAYERID ActorID;
+    if (!bsData.Read(ActorID))
+        return;
+
+    pActorPool->Delete(ActorID);
 }
 
 void ChatBubble(RPCParameters* rpcParams)

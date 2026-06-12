@@ -478,6 +478,10 @@ void CNetGame::ProcessPools()
 		GetPickupPool()->Process();
 	}
 
+	if (GetActorPool()) {
+		GetActorPool()->Process();
+	}
+
 	if (GetMenuPool()) {
 		GetMenuPool()->Process();
 	}

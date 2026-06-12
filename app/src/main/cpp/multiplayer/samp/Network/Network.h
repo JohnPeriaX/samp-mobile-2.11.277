@@ -49,6 +49,7 @@ typedef unsigned short OBJECTID;
 #include "samp/Network/Pools/VehiclePool.h"
 #include "samp/Network/Pools/MenuPool.h"
 #include "samp/Network/Pools/ObjectPool.h"
+#include "samp/Network/Pools/PickupPool.h"
 #include "samp/Network/Pools/PlayerBubblePool.h"
 #include "samp/Network/Pools/TextLabelPool.h"
 
@@ -107,6 +108,7 @@ public:
 	CPlayerPool* GetPlayerPool() { return m_pPools->pPlayerPool; }
 	CVehiclePool* GetVehiclePool() { return m_pPools->pVehiclePool; }
 	CObjectPool* GetObjectPool() { return m_pPools->pObjectPool; }
+	CPickupPool* GetPickupPool() { return m_pPools->pPickupPool; }
 	CMenuPool* GetMenuPool() { return m_pPools->pMenuPool; }
 	CPlayerBubblePool* GetPlayerBubblePool() { return m_pPools->pPlayerBubblePool; }
 	C3DTextLabelPool* GetTextLabelPool() { return m_pPools->pTextLabelPool; }
@@ -174,6 +176,7 @@ private:
 		CMenuPool			*pMenuPool;
 		CPlayerBubblePool	*pPlayerBubblePool;
 		CObjectPool			*pObjectPool;
+		CPickupPool			*pPickupPool;
 		C3DTextLabelPool	*pTextLabelPool;
 	} *m_pPools;
 

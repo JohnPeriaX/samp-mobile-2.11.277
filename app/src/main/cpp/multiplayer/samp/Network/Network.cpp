@@ -135,6 +135,7 @@ void CNetGame::InitializePools()
 	m_pPools->pMenuPool = new CMenuPool();
 	m_pPools->pPlayerBubblePool = new CPlayerBubblePool();
 	m_pPools->pObjectPool = new CObjectPool();
+	m_pPools->pPickupPool = new CPickupPool();
 	m_pPools->pTextLabelPool = new C3DTextLabelPool();
 }
 
@@ -158,6 +159,12 @@ void CNetGame::UninitializePools()
 		delete m_pPools->pObjectPool;
 		m_pPools->pObjectPool = nullptr;
 	}
+	if (m_pPools->pPickupPool)
+	{
+		delete m_pPools->pPickupPool;
+		m_pPools->pPickupPool = nullptr;
+	}
+
 	if (m_pPools->pPlayerBubblePool)
 	{
 		delete m_pPools->pPlayerBubblePool;
@@ -458,6 +465,10 @@ void CNetGame::ProcessPools()
 
 	if(GetVehiclePool()) {
 		GetVehiclePool()->Process();
+	}
+
+	if (GetPickupPool()) {
+		GetPickupPool()->Process();
 	}
 
 }	
@@ -1048,7 +1059,8 @@ void CNetGame::ResetMapIcons()
 // 0.3.7
 void CNetGame::ResetPickupPool()
 {
-
+	if (m_pPools && m_pPools->pPickupPool)
+		m_pPools->pPickupPool->Reset();
 }
 // 0.3.7
 void CNetGame::ResetObjectPool()

@@ -938,12 +938,39 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 // 0.3.7
 void Pickup(RPCParameters *rpcParams)
 {
+	Log::traceLastFunc("[RPC-IN] Pickup");
 
+	if (!pNetGame || !pNetGame->GetPickupPool()) return;
+
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+	int pickupId = -1;
+	PICKUP pickup{};
+
+	bsData.Read(pickupId);
+	bsData.Read(reinterpret_cast<char*>(&pickup), sizeof(PICKUP));
+
+	pNetGame->GetPickupPool()->New(&pickup, pickupId);
 }
 // 0.3.7
 void DestroyPickup(RPCParameters *rpcParams)
 {
+	Log::traceLastFunc("[RPC-IN] DestroyPickup");
 
+	if (!pNetGame || !pNetGame->GetPickupPool()) return;
+
+	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
+
+	int pickupId = -1;
+	bsData.Read(pickupId);
+
+	pNetGame->GetPickupPool()->Destroy(pickupId);
 }
 // 0.3.7
 void Create3DTextLabel(RPCParameters* rpcParams)

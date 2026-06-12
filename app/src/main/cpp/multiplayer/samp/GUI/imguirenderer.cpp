@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 #include "imguirenderer.h"
 #include "uisettings.h"
 
@@ -106,21 +107,29 @@ void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color,
 void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color, const std::string& text, bool outlined, float font_size)
 {
 	if (text.empty()) return;
+	drawTextInline(pos, color, text.c_str(), text.c_str() + text.length(), outlined, font_size);
+}
+
+void ImGuiRenderer::drawTextInline(const ImVec2& pos, const ImColor& color,
+	const char* begin, const char* end, bool outlined, float font_size)
+{
+	if (!begin || *begin == '\0') return;
+	if (!end) end = begin + std::strlen(begin);
+	if (begin >= end) return;
 
 	float sz_font = font_size == 0.0f ? m_font->FontSize : font_size;
 
-	const char* text_start = text.c_str();
-	const char* text_cur = text.c_str();
-	const char* text_end = text.c_str() + text.length();
+	const char* text_start = begin;
+	const char* text_cur = begin;
+	const char* text_end = end;
 
 	ImVec2 pos_cur = pos;
 	ImColor color_cur = color;
 
-	while (*text_cur)
+	while (text_cur < text_end && *text_cur)
 	{
-		if (*text_cur == '{' && ((&text_cur[7] < text_end) && text_cur[7] == '}'))
+		if (*text_cur == '{' && text_cur + 7 < text_end && text_cur[7] == '}')
 		{
-			// print accumulated text
 			if (text_cur != text_start)
 			{
 				drawText(pos_cur, color_cur, text_start, text_cur, outlined, sz_font);
@@ -128,7 +137,6 @@ void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color, const std:
 				pos_cur.x += sz.x;
 			}
 
-			// new colorcode
 			ImVec4 col;
 			if (processInlineHexColor(text_cur + 1, text_cur + 7, col)) {
 				color_cur = col;
@@ -139,7 +147,6 @@ void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color, const std:
 		}
 		else if (*text_cur == '\n')
 		{
-			// print accumulated text
 			if (text_cur != text_start)
 			{
 				drawText(pos_cur, color_cur, text_start, text_cur, outlined, sz_font);
@@ -151,7 +158,6 @@ void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color, const std:
 		}
 		else if (*text_cur == '\t')
 		{
-			// print accumulated text
 			if (text_cur != text_start)
 			{
 				drawText(pos_cur, color_cur, text_start, text_cur, outlined, sz_font);
@@ -173,23 +179,30 @@ void ImGuiRenderer::drawText(const ImVec2& pos, const ImColor& color, const std:
 
 ImVec2 ImGuiRenderer::calculateTextSize(const std::string& text, float font_size)
 {
+	if (text.empty()) return {0.0f, 0.0f};
+	return calculateTextSizeInline(text.c_str(), text.c_str() + text.length(), font_size);
+}
+
+ImVec2 ImGuiRenderer::calculateTextSizeInline(const char* begin, const char* end, float font_size)
+{
 	ImVec2 text_size = { 0.0f, 0.0f };
-	if (text.empty()) return text_size;
+	if (!begin || *begin == '\0') return text_size;
+	if (!end) end = begin + std::strlen(begin);
+	if (begin >= end) return text_size;
 
 	ImVec2 cur_size = { 0.0f, 0.0f };
 	if (font_size == 0.0f) font_size = m_font->FontSize;
 	
-	const char* text_start = text.c_str();
-	const char* text_cur = text.c_str();
-	const char* text_end = text.c_str() + text.length();
+	const char* text_start = begin;
+	const char* text_cur = begin;
+	const char* text_end = end;
 
-	while (*text_cur)
+	while (text_cur < text_end && *text_cur)
 	{
-		if (*text_cur == '{' && ((&text_cur[7] < text_end) && text_cur[7] == '}'))
+		if (*text_cur == '{' && text_cur + 7 < text_end && text_cur[7] == '}')
 		{
 			if (text_cur != text_start)
 			{
-				// ����� �� �����-����
 				ImVec2 sz = calculateTextSize(text_start, text_cur, font_size);
 				cur_size.x += sz.x;
 				if (cur_size.y == 0.0f) cur_size.y = sz.y;
@@ -202,13 +215,11 @@ ImVec2 ImGuiRenderer::calculateTextSize(const std::string& text, float font_size
 		{
 			if (text_cur != text_start)
 			{
-				// ����� �� \n
 				ImVec2 sz = calculateTextSize(text_start, text_cur, font_size);
 				cur_size.x += sz.x;
 				if (cur_size.y == 0.0f) cur_size.y = sz.y;
 			}
 
-			// ��������� text_size
 			text_size.x = ImMax(text_size.x, cur_size.x);
 			cur_size.y += font_size;
 			cur_size.x = 0.0f;
@@ -219,7 +230,6 @@ ImVec2 ImGuiRenderer::calculateTextSize(const std::string& text, float font_size
 		{
 			if (text_cur != text_start)
 			{
-				// ����� �� \t
 				ImVec2 sz = calculateTextSize(text_start, text_cur, font_size);
 				cur_size.x += sz.x;
 				if (cur_size.y == 0.0f) cur_size.y = sz.y;
@@ -234,7 +244,6 @@ ImVec2 ImGuiRenderer::calculateTextSize(const std::string& text, float font_size
 
 	if (text_cur != text_start)
 	{
-		// ����� ��� ��������������
 		ImVec2 sz = calculateTextSize(text_start, text_cur, font_size);
 		cur_size.x += sz.x;
 		if (cur_size.y == 0.0f) cur_size.y = sz.y;

@@ -156,6 +156,10 @@ void InitGame(RPCParameters* rpcParams)
 
 	pNetGame->SetGameState(GAMESTATE_CONNECTED);
 
+	if (pNetGame->GetTextLabelPool()) {
+		pNetGame->GetTextLabelPool()->ResyncAttachedLabels();
+	}
+
 	pPlayerPool->GetLocalPlayer()->HandleClassSelection();
 
 	
@@ -648,6 +652,10 @@ void WorldPlayerAdd(RPCParameters *rpcParams)
 						pPlayerPed->SetImmunities(0, 1, 1, 0, 0);
 					}
 				}
+
+				if (pNetGame && pNetGame->GetTextLabelPool()) {
+					pNetGame->GetTextLabelPool()->ResyncAttachedLabels();
+				}
 			}
 			else {
 				if (pUI) pUI->chat()->addDebugMessage("Warning: Couldn't spawn player(%u)", playerId);
@@ -938,39 +946,12 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 // 0.3.7
 void Pickup(RPCParameters *rpcParams)
 {
-	Log::traceLastFunc("[RPC-IN] Pickup");
 
-	if (!pNetGame || !pNetGame->GetPickupPool()) return;
-
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	int pickupId = -1;
-	PICKUP pickup{};
-
-	bsData.Read(pickupId);
-	bsData.Read(reinterpret_cast<char*>(&pickup), sizeof(PICKUP));
-
-	pNetGame->GetPickupPool()->New(&pickup, pickupId);
 }
 // 0.3.7
 void DestroyPickup(RPCParameters *rpcParams)
 {
-	Log::traceLastFunc("[RPC-IN] DestroyPickup");
 
-	if (!pNetGame || !pNetGame->GetPickupPool()) return;
-
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	int pickupId = -1;
-	bsData.Read(pickupId);
-
-	pNetGame->GetPickupPool()->Destroy(pickupId);
 }
 // 0.3.7
 void Create3DTextLabel(RPCParameters* rpcParams)
@@ -1007,6 +988,7 @@ void Create3DTextLabel(RPCParameters* rpcParams)
 
 	pNetGame->GetTextLabelPool()->CreateTextLabel(labelId, text, color, pos, drawDistance,
 		useLineOfSight != 0, attachedPlayerId, attachedVehicleId);
+	pNetGame->GetTextLabelPool()->ResyncAttachedLabels();
 }
 // 0.3.7
 void Update3DTextLabel(RPCParameters* rpcParams)
@@ -1033,6 +1015,7 @@ void Update3DTextLabel(RPCParameters* rpcParams)
 		bsData.Read(color);
 		stringCompressor->DecodeString(text, 2048, &bsData);
 		pNetGame->GetTextLabelPool()->Update3DLabel(labelId, color, text);
+		pNetGame->GetTextLabelPool()->ResyncAttachedLabels();
 	}
 	else
 	{
@@ -1380,38 +1363,12 @@ void VehicleParamsEx(RPCParameters* rpcParams)
 // 0.3.7
 void ShowActor(RPCParameters* rpcParams)
 {
-	Log::traceLastFunc("RPC: ShowActor");
 
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
-
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	NEW_ACTOR newActor;
-	memset(&newActor, 0, sizeof(NEW_ACTOR));
-	bsData.Read((char*)&newActor, sizeof(NEW_ACTOR));
-
-	pActorPool->New(&newActor);
 }
 // 0.3.7
 void HideActor(RPCParameters* rpcParams)
 {
-	Log::traceLastFunc("RPC: HideActor");
 
-	unsigned char* Data = reinterpret_cast<unsigned char*>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-
-	CActorPool* pActorPool = pNetGame ? pNetGame->GetActorPool() : nullptr;
-	if (!pActorPool) return;
-
-	PLAYERID ActorID;
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-	bsData.Read(ActorID);
-
-	pActorPool->Delete(ActorID);
 }
 
 void ChatBubble(RPCParameters* rpcParams)

@@ -29,10 +29,6 @@ file(GLOB_RECURSE MULTIPLAYER_SOURCES CONFIGURE_DEPENDS
 # duplicate linker symbols such as CQuaternion::SetFromMatrix/GetMatrix/Normalize/Slerp.
 list(FILTER MULTIPLAYER_SOURCES EXCLUDE REGEX ".*__dup_[0-9A-Fa-f]+\\.(c|cc|cpp|cxx)$")
 
-# Hooks/patches/performance were moved out of samp/Multiplayer.
-# Exclude stale old files if users copy this package over an existing tree.
-list(FILTER MULTIPLAYER_SOURCES EXCLUDE REGEX ".*/samp/Multiplayer/(CFPSFix|Patches|Hooks)\\.cpp$")
-
 # Keep target/output name as `samp` because Java/native loader expects libsamp.so.
 add_library(samp SHARED ${MULTIPLAYER_SOURCES})
 

@@ -21,6 +21,7 @@
   <a href="#thai"><img src="https://img.shields.io/badge/THAI-111827?style=for-the-badge&logo=readme&logoColor=A78BFA" alt="Thai"></a>
   <a href="#build"><img src="https://img.shields.io/badge/BUILD-0F172A?style=for-the-badge&logo=gradle&logoColor=38BDF8" alt="Build"></a>
   <a href="#mission-control"><img src="https://img.shields.io/badge/MISSION_CONTROL-1E1B4B?style=for-the-badge&logo=rocket&logoColor=00F5FF" alt="Mission Control"></a>
+  <a href="#live-repository-metrics"><img src="https://img.shields.io/badge/LIVE_STATS-0F172A?style=for-the-badge&logo=github&logoColor=00F5FF" alt="Live Stats"></a>
   <a href="#ai-development-notice"><img src="https://img.shields.io/badge/AI_ASSISTED-312E81?style=for-the-badge&logo=openai&logoColor=FFFFFF" alt="AI Assisted Development"></a>
   <a href="#project-scope"><img src="https://img.shields.io/badge/SCOPE-BASIC_READY-0F766E?style=for-the-badge&logo=target&logoColor=FFFFFF" alt="Project Scope"></a>
   <a href="#disclaimer"><img src="https://img.shields.io/badge/DISCLAIMER-450A0A?style=for-the-badge&logo=warning&logoColor=FCA5A5" alt="Disclaimer"></a>
@@ -46,6 +47,49 @@
 <p align="center">
   <img src="https://skillicons.dev/icons?i=androidstudio,java,cpp,cmake,gradle,github&theme=dark" alt="Tech Icons">
 </p>
+
+<a id="live-repository-metrics"></a>
+
+## 📡 Live Repository Metrics
+
+<p align="center">
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/stargazers">
+    <img src="https://img.shields.io/github/stars/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Stars&logo=github&color=00F5FF&labelColor=020617&cacheSeconds=60" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/watchers">
+    <img src="https://img.shields.io/github/watchers/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Watching&logo=github&color=38BDF8&labelColor=020617&cacheSeconds=60" alt="GitHub Watchers">
+  </a>
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/forks">
+    <img src="https://img.shields.io/github/forks/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Forks&logo=github&color=A78BFA&labelColor=020617&cacheSeconds=60" alt="GitHub Forks">
+  </a>
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/issues">
+    <img src="https://img.shields.io/github/issues/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Issues&logo=github&color=F59E0B&labelColor=020617&cacheSeconds=60" alt="GitHub Issues">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/pulls">
+    <img src="https://img.shields.io/github/issues-pr/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Pull%20Requests&logo=github&color=7C3AED&labelColor=020617&cacheSeconds=60" alt="GitHub Pull Requests">
+  </a>
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/commits/main">
+    <img src="https://img.shields.io/github/last-commit/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Last%20Commit&logo=git&color=22D3EE&labelColor=020617&cacheSeconds=60" alt="GitHub Last Commit">
+  </a>
+  <a href="https://github.com/JohnPeriaX/samp-mobile-2.11.311/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/JohnPeriaX/samp-mobile-2.11.311?style=for-the-badge&label=Contributors&logo=github&color=06B6D4&labelColor=020617&cacheSeconds=60" alt="GitHub Contributors">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/repo-size/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Repo%20Size&color=00F5FF&labelColor=020617&cacheSeconds=60" alt="Repository Size">
+  <img src="https://img.shields.io/github/languages/top/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=Top%20Language&color=A78BFA&labelColor=020617&cacheSeconds=60" alt="Top Language">
+  <img src="https://img.shields.io/github/license/JohnPeriaX/samp-mobile-2.11.311?style=flat-square&label=License&color=38BDF8&labelColor=020617&cacheSeconds=60" alt="License">
+</p>
+
+<p align="center">
+  <sub>Auto-updated from GitHub via dynamic shields. Values refresh automatically; GitHub / Shields image cache may delay changes briefly.</sub>
+</p>
+
+---
 
 <p align="center">
   <img src="https://github-readme-stats.vercel.app/api/pin/?username=JohnPeriaX&repo=samp-mobile-2.11.311&theme=tokyonight&hide_border=true&bg_color=020617&title_color=00F5FF&text_color=E0F2FE&icon_color=A78BFA" alt="Repository Card">
